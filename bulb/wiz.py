@@ -1,6 +1,10 @@
 from typing import List, Dict, Optional
-from asyncio import run
 from pywizlight import wizlight, discovery
+import asyncio, logging
+
+logger = logging.getLogger(__name__)
+
+WizBulbs = None
 
 class WizBulbManager:
     def __init__(
@@ -24,9 +28,18 @@ class WizBulbManager:
         return bulbs
 
     async def turn_on(self) -> None:
-        for bulb in self.bulbs.values():
-            await bulb.turn_on()
+        await asyncio.gather(*[bulb.turn_on() for bulb in self.bulbs.values()])
 
     async def turn_off(self) -> None:
-        for bulb in self.bulbs.values():
-            await bulb.turn_off()
+        await asyncio.gather(*[bulb.turn_off() for bulb in self.bulbs.values()])
+
+def init_wiz_bulbs(config: dict) -> None:
+    logger.info("Use %s mode to load bulb", config["init_mode"])
+    global WizBulbs
+    if config["init_mode"] == "discovery" and "discovery_broadcast_ip" in config:
+        discovered_bulbs = asyncio.run(WizBulbManager.discover_bulbs())
+        WizBulbs = WizBulbManager(wizlight_list=discovered_bulbs)
+    elif config["init_mode"] == "static" and "wiz_bulb_ip" in config:
+        WizBulbs = WizBulbManager(config_list=config["wiz_bulb_ip"])
+    else:
+        raise Exception("bulb config invalid")

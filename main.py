@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import asyncio, logging, yaml, sys, signal, os
 
-from bulb.wiz import WizBulbManager
+from bulb.wiz import init_wiz_bulbs
 from constants import TG_BOT_DESCRIPTION, TG_BOT_COMMANDS
 
 from telegram.ext import Application, CommandHandler
@@ -37,6 +37,7 @@ async def bot_init(token: str) -> Application:
 async def start_telegram_bot(config: dict = {}) -> None:
     try:
         application = await bot_init(config["token"])
+
         await application.initialize()
         await application.updater.start_webhook(
             listen='0.0.0.0',
@@ -66,31 +67,27 @@ async def start_telegram_bot(config: dict = {}) -> None:
             await application.stop()
             await application.shutdown()
 
+async def start_app(config: dict) -> None:
+    init_wiz_bulbs(config["bulb"])
+    await start_telegram_bot(config["telegram"])
+
 def main() -> None:
     try:
         with open("./config.yml", "r") as f:
             config = yaml.safe_load(f)
             logging.debug(config)
-
         logger.info("Config file loaded")
-        logger.info("Use %s mode to load bulb", config["bulb"]["init_mode"])
 
-        if config["bulb"]["init_mode"] == "discovery" and "discovery_broadcast_ip" in config["bulb"]:
-            discovered_bulbs = asyncio.run(WizBulbManager.discover_bulbs())
-            bulb_manager = WizBulbManager(wizlight_list=discovered_bulbs)
-        elif config["bulb"]["init_mode"] == "static" and "wiz_bulb_ip" in config["bulb"]:
-            bulb_manager = WizBulbManager(config["bulb"]["wiz_bulb_ip"])
-        else:
-            raise Exception("bulb config invalid")
+        if "telegram" not in config or "bulb" not in config:
+            raise Exception("config invalid")
 
-        if "telegram" not in config:
-            raise Exception("telegram config invalid")
-
-        logger.info("Load telegram bot")
-        asyncio.run(start_telegram_bot(config["telegram"]))
+        logger.info("Initializing")
+        asyncio.run(start_app(config))
 
     except Exception as e:
         logger.critical(f"init fail: {e}")
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()
