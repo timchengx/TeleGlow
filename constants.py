@@ -8,3 +8,6 @@ TG_BOT_COMMANDS = [
 TG_BOT_DESCRIPTION = "要開, 還是要關?"
 
 TG_BOT_TBD = "好🍷成甕底"
+
+TG_BOT_MSG_ON = "☀️"
+TG_BOT_MSG_OFF = "🌙"
