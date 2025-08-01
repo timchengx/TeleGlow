@@ -5,7 +5,6 @@ from bulb.wiz import init_wiz_bulbs
 from constants import TG_BOT_DESCRIPTION, TG_BOT_COMMANDS
 
 from telegram.ext import Application, CommandHandler
-from telegram_bot.commands import all_on, all_off
 
 formatter = logging.Formatter("%(asctime)s - [%(levelname)-8s] %(message)s [%(module)s/%(funcName)s]")
 handler = logging.StreamHandler(sys.stdout)
@@ -26,6 +25,7 @@ config = None
 async def bot_init(token: str) -> Application:
     application = Application.builder().token(token).build()
 
+    from telegram_bot.commands import all_on, all_off   # load after bulb manager init
     application.add_handler(CommandHandler("all_on", all_on))
     application.add_handler(CommandHandler("all_off", all_off))
 
@@ -68,7 +68,7 @@ async def start_telegram_bot(config: dict = {}) -> None:
             await application.shutdown()
 
 async def start_app(config: dict) -> None:
-    init_wiz_bulbs(config["bulb"])
+    await init_wiz_bulbs(config["bulb"])
     await start_telegram_bot(config["telegram"])
 
 def main() -> None:
