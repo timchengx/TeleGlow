@@ -22,6 +22,8 @@ class WizBulbManager:
                 for i in config_list:
                     self.bulbs[i["name"]] = wizlight(i["ip"])
 
+        logger.debug("WizBulbManager created, dict: %s ", self.bulbs)
+
     @staticmethod
     async def discover_bulbs(broadcast_space: str = "192.168.1.255") -> List[wizlight]:
         bulbs = await discovery.discover_lights(broadcast_space=broadcast_space)
@@ -33,11 +35,11 @@ class WizBulbManager:
     async def turn_off(self) -> None:
         await asyncio.gather(*[bulb.turn_off() for bulb in self.bulbs.values()])
 
-def init_wiz_bulbs(config: dict) -> None:
+async def init_wiz_bulbs(config: dict) -> None:
     logger.info("Use %s mode to load bulb", config["init_mode"])
     global WizBulbs
     if config["init_mode"] == "discovery" and "discovery_broadcast_ip" in config:
-        discovered_bulbs = asyncio.run(WizBulbManager.discover_bulbs())
+        discovered_bulbs = await WizBulbManager.discover_bulbs(config["discovery_broadcast_ip"])
         WizBulbs = WizBulbManager(wizlight_list=discovered_bulbs)
     elif config["init_mode"] == "static" and "wiz_bulb_ip" in config:
         WizBulbs = WizBulbManager(config_list=config["wiz_bulb_ip"])
