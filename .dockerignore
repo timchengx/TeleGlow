@@ -208,6 +208,8 @@ __marimo__/
 
 # Build specific exclude file
 config.yml
+Dockerfile
 .git/
 .github/
 .dockerignore
+.gitignore
