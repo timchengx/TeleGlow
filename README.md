@@ -27,4 +27,7 @@ bulb:
 users:
   - 000000000
 ```
-3. Install necessary dependency and run
+3. Install necessary dependency and run container
+```
+docker run -p <PORT>:<PORT> -v <PATH_OF_config.yml>:/app/config.yml <IMAGE>
+```
