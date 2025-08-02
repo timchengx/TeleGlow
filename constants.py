@@ -11,3 +11,4 @@ TG_BOT_TBD = "好🍷成甕底"
 
 TG_BOT_MSG_ON = "☀️"
 TG_BOT_MSG_OFF = "🌙"
+TG_BOT_MSG_NONO = "沒辦法用喔🙅‍♂️"

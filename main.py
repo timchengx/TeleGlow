@@ -2,6 +2,7 @@
 import asyncio, logging, yaml, sys, signal, os
 
 from bulb.wiz import init_wiz_bulbs
+from telegram_bot.utils import load_authorized_users
 from constants import TG_BOT_DESCRIPTION, TG_BOT_COMMANDS
 
 from telegram.ext import Application, CommandHandler
@@ -69,6 +70,10 @@ async def start_telegram_bot(config: dict = {}) -> None:
 
 async def start_app(config: dict) -> None:
     await init_wiz_bulbs(config["bulb"])
+    if "users" in config and config["users"] is not None:
+        load_authorized_users(config["users"])
+    else:
+        logger.warning("Allowed user list is not configured")
     await start_telegram_bot(config["telegram"])
 
 def main() -> None:
